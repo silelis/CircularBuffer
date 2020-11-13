@@ -20,6 +20,7 @@ using namespace std;
 template<typename T, size_t Size> class CircularBuffer {
 
 public:
+	CircularBuffer(void);
 	~CircularBuffer(void);
 	void put(T item);								//wpisuje dane do bufora kołowego i uaktualnia zmienną head_
 	T get(void);									//podaje warość [] z bufora kołowego i uaktualnia zmienną tail_
@@ -31,6 +32,7 @@ public:
 	size_t dataSize(void) const;					//zwraca informację na temay ilości danych jakie są aktualnie przechowywane w buforze kołowym
 	//todo: return string
 	void reset(void);
+	void clearBuffer(void);							//Set buffer to NULL do not change head_ and tail_
 
 protected:
 
@@ -46,6 +48,10 @@ private:
 
 /*==================================================================================================*/
 
+template<typename T, size_t Size> CircularBuffer<T, Size>::CircularBuffer(void) {
+	clearBuffer();
+}
+
 template<typename T, size_t Size> CircularBuffer<T, Size>::~CircularBuffer(void) {
 	head_ = 0;
 	tail_ = 0;
@@ -56,6 +62,11 @@ template <typename T, size_t Size> void CircularBuffer<T, Size>::reset(void) {
 	head_ = tail_;
 	full_ = false;
 	overflow = false;
+	clearBuffer();
+}
+
+template <typename T, size_t Size> void CircularBuffer<T, Size>::clearBuffer(void) {
+	memset(buf_, NULL, sizeof(T)*Size);
 }
 
 template<typename T, size_t Size> bool  CircularBuffer<T, Size>::isEmpty(void) const {			//if there is no data

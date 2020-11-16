@@ -27,7 +27,7 @@ public:
 	bool isEmpty(void) const;
 	bool isFull(void) const;
 	bool isOverflowed(void) const;
-	bool /*int*/ searchItem(T* item, size_t items, bool tailPosUpdate = true);	//sprawdza czy w buforze kołowym znajdują się dane, jeśli tak to zwraca TRUE i jeśli tailPosUpdate==True to ustawia tail_ w mniejscu pozwalającym na czytanie tej informacji, jeśli bool tailPosUpdate!=true to zwraca tylko informację.
+	bool /*int*/ searchItem(const T* item, size_t items, bool tailPosUpdate = true);	//sprawdza czy w buforze kołowym znajdują się dane, jeśli tak to zwraca TRUE i jeśli tailPosUpdate==True to ustawia tail_ w mniejscu pozwalającym na czytanie tej informacji, jeśli bool tailPosUpdate!=true to zwraca tylko informację.
 	size_t capacity(void) const;					//zwraca pojemnośc bufora kołowego
 	size_t dataSize(void) const;					//zwraca informację na temay ilości danych jakie są aktualnie przechowywane w buforze kołowym
 	//todo: return string
@@ -132,7 +132,7 @@ template<typename T, size_t Size> T CircularBuffer<T, Size>::get(void) {					//r
 }
 
 
-template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItem(T *item, size_t items, bool tailPosUpdate) {
+template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItem(const T *item, size_t items, bool tailPosUpdate) {
 	//szuka czy w buforze znajduje się item[] jeśli tak to:
 	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
 	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość

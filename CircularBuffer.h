@@ -1,13 +1,22 @@
-
-/*
- * CircularBuffer.h
- *
- *  Created on: Nov 9, 2020
- *      Author: Dawid "SieliS" Bańkowski
- *      based on: //https://github.com/embeddedartistry/embedded-resources
- *
- */
-
+/**
+  ******************************************************************************
+  * @file    CircularBuffer.h
+  * @author  Dawid "SileliS" Bańkowski
+  * @brief   Circular Buffer class.
+  *          This file provides code to manage circular buffer.
+  *          It is platform independend.
+  *          based on: //https://github.com/embeddedartistry/embedded-resources
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2020 Dawid Bańkowski.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by GNU Public Licence, * the "License" *;
+  * You may not use this file except in compliance with the License and name of author.
+  *
+  ******************************************************************************
+  */
 #ifndef CIRCULARBUFFER_H_
 #define CIRCULARBUFFER_H_
 
@@ -15,46 +24,273 @@
 #include <cstdio>
 #include <cstring>
 
+//TODO: translate comments to english (I did not do this because lack of time)
+
 using namespace std;
 
+/**
+  * @brief  circularBufferSearchResult is helpfull to return sopfisticated search results.
+  *
+  * @param  n/a
+  *
+  * @param  n/a
+  *         n/a
+  * @retval isFound - bool variable which value is TRUE (information had been found in buffer)
+  * 		tail2virtualTail_ - liczba (size_t), która informuje o odległości pomiędzy tail_,
+  * 		 a pozycją, w której odnaleziono informacje. W szczególnych przypadkach może
+  * 		 przyjmować 0, gdy:
+  * 				- isFound = flase (nie znaleziono informacji)
+  * 				- szukana informacja znajduje sie w pozycji tail_
+  */
 typedef struct circularBufferSearchResult{
 	bool isFound;
 	size_t tail2virtualTail_;
 };
 
+/**
+* @brief  	CircularBuffer to klasa obsługująca bufor kołowy.
+* @param  	T 		- typ zmiennej jaka ma być przechowywana w buforze kołowym
+* 			Size	- wielkośc bufora kołowego
+*
+*/
 template<typename T, size_t Size> class CircularBuffer {
 
 public:
+/**
+* @brief  Konstruktor klasy.
+* @note   example: CircularBuffer<char, 25> nameOfBuffer;
+* @param  n/a.
+* @note   n/a.
+* @retval n/a.
+*/
 	CircularBuffer(void);
+
+/**
+* @brief  destruktor klasy.
+* @note   n/a.
+* @param  n/a.
+* @note   Czyści dane w obiekcie.
+* @retval n/a.
+*/
 	~CircularBuffer(void);
-	void put(T item);								//wpisuje dane do bufora kołowego i uaktualnia zmienną head_
-	T get(void);									//podaje warość [] z bufora kołowego i uaktualnia zmienną tail_
+
+/**
+* @brief  Wstawia do obiektu daną.
+* @note   Wstawia w miejsce wskazane przez head_
+
+* @param  n/a.
+* @note   Uaktualnia przy tym następujące zmienne w klasie:
+* 		- head_
+* 		- full,
+* 		- overflow
+* @retval n/a.
+*/
+	void put(T item);
+
+/**
+* @brief  Czyta dane z bufora kołowego.
+* @note   Czyta daną z bufora kołowego wskazaną przez tail_
+*
+* @param  n/a.
+*
+* @note   Uaktualnia przy tym następujące zmienne w klasie:
+* 		- full,
+* 		- tail_
+*
+* @retval Zwraca:
+* 			- warość typu T znajdującą się w przeczytanej komórce bufora jeśli isEmpty()!= TRUE
+* 			- T() jeśli isEmpty()== TRUE
+*/
+	T get(void);
+
+
+/**
+* @brief  Sprawdza czy w buforze znajdują się jakieś nieprzeczytane dane.
+* @note   n/a.
+*
+* @param  n/a.
+*
+* @note   n/a.
+*
+* @retval Zwraca:
+* 			- TRUE jeśli bufor jest pusty
+* 			- FALSE jeśli w buforze znajduje się jakakolwiek nieprzeczytana informacja
+*/
 	bool isEmpty(void) const;
+
+/**
+* @brief  Sprawdza czy do bufora można wpisać jeszcze jakieś dane.
+* @note   n/a.
+*
+* @param  n/a.
+*
+* @note   n/a.
+*
+* @retval Zwraca:
+*  			- TRUE jeśli bufor jest pełny dataSize == max_size
+*  			- FALSE jeśli w buforze jest jeszcze miejsce do zapisania danych
+*/
 	bool isFull(void) const;
+
+/**
+* @brief  Zwraca informację czy bufor nie został przepełniony.
+* @note   Przepełnienie oznacza brak spójności w konsystencji danych
+*
+* @param  n/a.
+*
+* @note   n/a.
+*
+* @retval Zwraca: TRUE FALSE
+*/
 	bool isOverflowed(void) const;
-	bool searchItem(const void* item, size_t items, bool tailPosUpdate = true);	//sprawdza czy w buforze kołowym znajdują się dane, jeśli tak to zwraca TRUE i jeśli tailPosUpdate==True to ustawia tail_ w mniejscu pozwalającym na czytanie tej informacji, jeśli bool tailPosUpdate!=true to zwraca tylko informację.
-	circularBufferSearchResult searchItem_(const void* item, size_t items, bool tailPosUpdate = true);	//sprawdza czy w buforze kołowym znajdują się dane, jeśli tak to zwraca strukturę, która wskazuje czy:
-																									//bool isFound = TRUE - dane odnaleziono i tail2virtualTail_ > 0  pozycję początku tych danych względem tail_ lub tail2virtualTail_ = 0 gdy nakzano zaktualizować tail_
-																									//bool isFound = FALSE	i tail2virtualTail_= 0, gdy nie znaleziono danych
-	size_t capacity(void) const;					//zwraca pojemnośc bufora kołowego
-	size_t dataSize(void) const;					//zwraca informację na temay ilości danych jakie są aktualnie przechowywane w buforze kołowym
-	//todo: return string
+
+/**
+* @brief  Zeruje parametry obiektu i czyści jego zawartość.
+* @note   Wymagane m.in. w przypadku, gdby bufor został przepełniony.
+*
+* @param  n/a.
+*
+* @note   Zmienia parmetry: head_, full_ , overflow
+*
+* @retval Zwraca: n/a.
+*/
 	void reset(void);
-	void clearBuffer(void);							//Set buffer to NULL do not change head_ and tail_
+
+/**
+* @brief  Zwraca informację na temat max pojemności bufora.
+* @note   n/a.
+*
+* @param  n/a.
+*
+* @note   n/a.
+*
+* @retval Zwraca wartośc (size_t) na temat maksymalniej pojemnosci bufora
+*/
+	size_t capacity(void) const;
+
+/**
+* @brief  Zwraca informację na temat ilości danych przechowywanych w buforze.
+* @note   n/a.
+*
+* @param  n/a.
+*
+* @note   n/a.
+*
+* @retval Zwraca wartośc (size_t) ilości danych przechowywanych w buforze
+*/
+	size_t dataSize(void) const;
+
+/**
+* @brief  Sprawdza czy bufor kołowy zawiera interesujące nas dane.
+* @note   Wyszukuje w zakresie od tail_ do tail_ + range
+*
+* @param  *item 		- wskaźnik do bufora zawierającego szukane informacje
+* 		  items 		- ilość danych typu T jaka ma być wyszukana
+* 		  range 		- zakres przeszukiwania
+* 		  tailPosUpdate - informuje obiekt czy po znalezieniu szykanej wartości ustawić na nią tail_
+* 		  					TRUE - wartośc domyśla oznacza, że tail_ powinien być uaktualniony
+* 		  					FALSE - oznacza, że tail_ nie powinien być uaktualniony
+* @note   n/a.
+*
+* @retval Zwraca:
+* 				- TRUE jeśli szukana wartośc została odnaleziona
+* 				- FALSE jeśli: 	szukany ciąg nazków jest dłuższy niż dane w buforze lub
+								nie znaleziono szukanej sekwencji
+								bufor został przepełniony i istnieje ryzyko błędnego odczytu
+*/
+	bool searchItemTail2Range(const void *item, size_t items, size_t range, bool tailPosUpdate= true);
+
+
+/**
+* @brief  Sprawdza czy bufor kołowy zawiera interesujące nas dane.
+* @note   Wyszukuje w zakresie od tail_ do head_
+*
+* @param  *item 		- wskaźnik do bufora zawierającego szukane informacje
+* 		  items 		- ilość danych typu T jaka ma być wyszukana
+* 		  tailPosUpdate - informuje obiekt czy po znalezieniu szykanej wartości ustawić na nią tail_
+* 		  					TRUE - wartośc domyśla oznacza, że tail_ powinien być uaktualniony
+* 		  					FALSE - oznacza, że tail_ nie powinien być uaktualniony
+* @note   n/a.
+*
+* @retval Zwraca:
+* 				- TRUE jeśli szukana wartośc została odnaleziona
+* 				- FALSE jeśli: 	szukany ciąg nazków jest dłuższy niż dane w buforze lub
+								nie znaleziono szukanej sekwencji
+								bufor został przepełniony i istnieje ryzyko błędnego odczytu
+*/
+	bool searchItem(const void* item, size_t items, bool tailPosUpdate = true);
+
+/**
+* @brief  Sprawdza czy bufor kołowy zawiera interesujące nas dane.
+* @note   Wyszukuje w zakresie od tail_ do tail_ + range
+*
+* @param  *item 		- wskaźnik do bufora zawierającego szukane informacje
+* 		  items 		- ilość danych typu T jaka ma być wyszukana
+* 		  tailPosUpdate - informuje obiekt czy po znalezieniu szykanej wartości ustawić na nią tail_
+* 		  					TRUE - wartośc domyśla oznacza, że tail_ powinien być uaktualniony
+* 		  					FALSE - oznacza, że tail_ nie powinien być uaktualniony
+* @note   n/a.
+*
+* @retval Zwraca strukturę circularBufferSearchResult o następujących polach:
+		  - isFound przyjmujących wartości:
+* 				- TRUE jeśli szukana wartośc została odnaleziona
+* 				- FALSE jeśli: 	szukany ciąg nazków jest dłuższy niż dane w buforze lub
+								nie znaleziono szukanej sekwencji
+								bufor został przepełniony i istnieje ryzyko błędnego odczytu
+		  - tail2virtualTail przyjmującą wartości:
+		  	    - > 0 wskazującą miejsce w buforze, w którym dana sekwencja jest zlokalizowana
+		  	    -   0 gdy nie znaleziono szukanej sekwencji lub znajduje się ona w pozycji 0 bufora
+		  	  	 -
+*/
+	circularBufferSearchResult SearchItemTail2Range(const void *item, size_t items, size_t range, bool tailPosUpdate= true);
+
+
+/**
+* @brief  Sprawdza czy bufor kołowy zawiera interesujące nas dane.
+* @note   Wyszukuje w zakresie od tail_ do head_
+*
+* @param  *item 		- wskaźnik do bufora zawierającego szukane informacje
+* 		  items 		- ilość danych typu T jaka ma być wyszukana
+* 		  range 		- zakres przeszukiwania
+* 		  tailPosUpdate - informuje obiekt czy po znalezieniu szykanej wartości ustawić na nią tail_
+* 		  					TRUE - wartośc domyśla oznacza, że tail_ powinien być uaktualniony
+* 		  					FALSE - oznacza, że tail_ nie powinien być uaktualniony
+* @note   n/a.
+*
+* @retval Zwraca strukturę circularBufferSearchResult o następujących polach:
+		  - isFound przyjmujących wartości:
+* 				- TRUE jeśli szukana wartośc została odnaleziona
+* 				- FALSE jeśli: 	szukany ciąg nazków jest dłuższy niż dane w buforze lub
+								nie znaleziono szukanej sekwencji
+								bufor został przepełniony i istnieje ryzyko błędnego odczytu
+		  - tail2virtualTail przyjmującą wartości:
+				- > 0 wskazującą miejsce w buforze, w którym dana sekwencja jest zlokalizowana
+
+*/
+	circularBufferSearchResult SearchItem(const void* item, size_t items, bool tailPosUpdate = true);
+
+
 
 protected:
 
 private:
-	size_t head_ = 0;					//miejsce ostatniego zapisu danych
-	size_t tail_ = 0;					//miejsce ostatniego odczytu danych
-	size_t max_size_ = Size;			// = Size;
-	bool overflow = false;
-	bool full_ = 0;
-	T buf_[Size];
+	T buf_[Size];									//bufor
+	size_t head_ = 0;								//miejsce zapisu danych
+	size_t tail_ = 0;								//miejsce odczytu danych
+	size_t max_size_ = Size;						//pojemnośc bufora
+	bool overflow = false;							//informacja o przepełnieniu bufora
+	bool full_ = 0;									//zmienia wartośc na 1 jeśli bufor zawiera conajmniej 1 daną
+	void clearBuffer(void);							//czyści bufor
 };
 
 
-/*==================================================================================================*/
+
+/****************************************************************************************************
+*
+*
+*
+*
+****************************************************************************************************/
 
 template<typename T, size_t Size> CircularBuffer<T, Size>::CircularBuffer(void) {
 	clearBuffer();
@@ -77,20 +313,18 @@ template <typename T, size_t Size> void CircularBuffer<T, Size>::clearBuffer(voi
 	memset(buf_, NULL, sizeof(T)*Size);
 }
 
-template<typename T, size_t Size> bool  CircularBuffer<T, Size>::isEmpty(void) const {			//if there is no data
-	//if head and tail are equal, we are empty
+template<typename T, size_t Size> bool  CircularBuffer<T, Size>::isEmpty(void) const {
 	return (!full_ && (head_ == tail_));
 }
 
 
-template<typename T, size_t Size> bool  CircularBuffer<T, Size>::isFull(void) const {		//dataSize == max_size_
-	//If tail is ahead the head by 1, we are full
+template<typename T, size_t Size> bool  CircularBuffer<T, Size>::isFull(void) const {
 	return full_;
 }
 
 
 template<typename T, size_t Size> bool CircularBuffer<T, Size>::isOverflowed(void) const {
-	return overflow; //(full_ && (head_ == tail_));
+	return overflow;
 }
 
 
@@ -98,12 +332,13 @@ template<typename T, size_t Size> size_t CircularBuffer<T, Size>::capacity(void)
 	return max_size_;
 }
 
-template<typename T, size_t Size> size_t CircularBuffer<T, Size>::dataSize(void) const {			//freeSpace
+
+template<typename T, size_t Size> size_t CircularBuffer<T, Size>::dataSize(void) const {
 
 	size_t size = max_size_;
 	if (!full_) {
 		if (head_ >= tail_) {
-			return size = head_ - tail_;	//ok
+			return size = head_ - tail_;
 		} else {
 			return size = max_size_ + head_ - tail_;
 		}
@@ -113,8 +348,6 @@ template<typename T, size_t Size> size_t CircularBuffer<T, Size>::dataSize(void)
 }
 
 template<typename T, size_t Size> void CircularBuffer<T, Size>::put(T item) {				//put item into buffer
-	//todo: check freespace i zwrot wartościo
-
 	buf_[head_] = item;
 
 	if (full_) {
@@ -139,7 +372,8 @@ template<typename T, size_t Size> T CircularBuffer<T, Size>::get(void) {					//r
 	return val;
 }
 
-template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, Size>::searchItem_(const void *item, size_t items, bool tailPosUpdate) {
+
+template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, Size>::SearchItemTail2Range(const void *item, size_t items, size_t range, bool tailPosUpdate){
 	//szuka czy w buforze znajduje się item[] jeśli tak to:
 	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
 	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
@@ -151,7 +385,11 @@ template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, S
 	if (!isOverflowed())
 	{
 		size_t searchingPosition = tail_;
-		size_t toLinearedHead_ = tail_ + dataSize();				//virtualny koniec bufora, gdyby był liniowym
+
+		if (range > max_size_)
+			range = max_size_;
+		size_t toLinearedHead_ = tail_ + range; //dataSize(head_, range);				//virtualny koniec bufora, gdyby był liniowym
+
 		size_t itemsOnTheEnd;										//liczba pamięta ile danych memcmp powinno sprawdzić na końcu bufora kołowego, a ile na jego początku
 		size_t tail2virtualTail_Distance = 0;
 
@@ -193,7 +431,106 @@ template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, S
 
 
 
+template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, Size>::SearchItem(const void *item, size_t items, bool tailPosUpdate) {
+	return SearchItemTail2Range (item, items, dataSize(), tailPosUpdate);
+//	//szuka czy w buforze znajduje się item[] jeśli tak to:
+//	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
+//	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
+//	//			FALSE	- jeśli nie odnaleziono szukanej wartości
+//
+//	circularBufferSearchResult returnVAL;
+//	returnVAL.isFound =false;
+//	returnVAL.tail2virtualTail_ =0;
+//	if (!isOverflowed())
+//	{
+//		size_t searchingPosition = tail_;
+//		size_t toLinearedHead_ = tail_ + dataSize();				//virtualny koniec bufora, gdyby był liniowym
+//		size_t itemsOnTheEnd;										//liczba pamięta ile danych memcmp powinno sprawdzić na końcu bufora kołowego, a ile na jego początku
+//		size_t tail2virtualTail_Distance = 0;
+//
+//		char* cbuf_ = (char *) buf_;
+//		char* citem = (char *) item;
+//
+//		while(searchingPosition+items <= toLinearedHead_)
+//		{
+//			searchingPosition = (searchingPosition) % max_size_;
+//
+//			itemsOnTheEnd = max_size_- searchingPosition;			//sprawdzanie czy części danych nie trzeba szukać na początku bufora kołowego
+//			if (itemsOnTheEnd>=items)
+//				itemsOnTheEnd=items;
+//
+//			if (memcmp((cbuf_+searchingPosition ), citem, sizeof (T)*itemsOnTheEnd)==0)				//sprawdzanie danych na końcu bufora kołowego
+//			{
+//
+//				if (memcmp((cbuf_), citem+itemsOnTheEnd, sizeof (T)*(items-itemsOnTheEnd))==0)		//sprawdzanie danych na początku bufora kołowego
+//				{
+//					returnVAL.isFound = true;
+//					returnVAL.tail2virtualTail_ =tail2virtualTail_Distance/sizeof(T);
+//					if (tailPosUpdate==true)
+//					{
+//						tail_=searchingPosition;		//ustawnienie pozycji odczytu na miejsce taila
+//					}
+//					return returnVAL;					//znaleziono poprawną sekwencję
+//				}
+//			}
+//			searchingPosition++;
+//			if (searchingPosition == tail_)		//aby wyjśc z pętli nieskończonej jesli w buforze nie ma szukanego ciągu
+//				break;
+//			tail2virtualTail_Distance++;
+//		};
+//	}
+//	return returnVAL;		//szukany ciąg nazków jest dłuższy niż dane w buforze lub
+//						//nie znaleziono szukanej sekwencji
+//						//bufor został przepełniony i istnieje ryzyko błędnego odczytu
+}
+
+
+
 template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItem(const void *item, size_t items, bool tailPosUpdate) {
+	//szuka czy w buforze znajduje się item[] jeśli tak to:
+	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
+	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
+	//			FALSE	- jeśli nie odnaleziono szukanej wartości
+
+	return searchItemTail2Range(item, items, dataSize(), tailPosUpdate);
+//	if (!isOverflowed())
+//	{
+//		size_t searchingPosition = tail_;
+//		size_t toLinearedHead_ = tail_ + dataSize();				//virtualny koniec bufora, gdyby był liniowym
+//		size_t itemsOnTheEnd;										//liczba pamięta ile danych memcmp powinno sprawdzić na końcu bufora kołowego, a ile na jego początku
+//
+//		char* cbuf_ = (char *) buf_;								//potrzeba, aby przyjmować const void *item
+//		char* citem = (char *) item;								//potrzeba, aby przyjmować const void *item
+//
+//		while(searchingPosition+items <= toLinearedHead_)
+//		{
+//			searchingPosition = (searchingPosition) % max_size_;
+//
+//			itemsOnTheEnd = max_size_- searchingPosition;			//sprawdzanie czy części danych nie trzeba szukać na początku bufora kołowego
+//			if (itemsOnTheEnd>=items)
+//				itemsOnTheEnd=items;
+//
+//			if (memcmp((cbuf_+searchingPosition ), citem, sizeof (T)*itemsOnTheEnd)==0)				//sprawdzanie danych na końcu bufora kołowego
+//			{
+//				if (memcmp((cbuf_), citem+itemsOnTheEnd, sizeof (T)*(items-itemsOnTheEnd))==0)		//sprawdzanie danych na początku bufora kołowego
+//				{
+//					if (tailPosUpdate==true)
+//						tail_=searchingPosition;		//ustawnienie pozycji odczytu na miejsce taila
+//					return true;					//znaleziono poprawną sekwencję
+//				}
+//			}
+//			searchingPosition++;
+//			if (searchingPosition == tail_)		//aby wyjśc z pętli nieskończonej jesli w buforze nie ma szukanego ciągu
+//				break;
+//		};
+//	}
+//	return false;		//szukany ciąg nazków jest dłuższy niż dane w buforze lub
+//						//nie znaleziono szukanej sekwencji
+//						//bufor został przepełniony i istnieje ryzyko błędnego odczytu
+}
+
+
+template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItemTail2Range(const void *item, size_t items, size_t range, bool tailPosUpdate) {
 	//szuka czy w buforze znajduje się item[] jeśli tak to:
 	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
 	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
@@ -203,7 +540,9 @@ template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItem(const
 	if (!isOverflowed())
 	{
 		size_t searchingPosition = tail_;
-		size_t toLinearedHead_ = tail_ + dataSize();				//virtualny koniec bufora, gdyby był liniowym
+		if (range > max_size_)
+			range = max_size_;
+		size_t toLinearedHead_ = tail_ + range; //dataSize(head_, range);				//virtualny koniec bufora, gdyby był liniowym
 		size_t itemsOnTheEnd;										//liczba pamięta ile danych memcmp powinno sprawdzić na końcu bufora kołowego, a ile na jego początku
 
 		char* cbuf_ = (char *) buf_;								//potrzeba, aby przyjmować const void *item

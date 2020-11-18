@@ -364,8 +364,7 @@ template<typename T, size_t Size> T CircularBuffer<T, Size>::get(void) {					//r
 	if (isEmpty()) {
 		return T();
 	}
-	//Read data and advance the tail (we now have a free space)
-	/*auto*/ T val = buf_[tail_];
+	T val = buf_[tail_];
 	full_ = false;
 	tail_ = (tail_ + 1) % max_size_;
 
@@ -374,11 +373,6 @@ template<typename T, size_t Size> T CircularBuffer<T, Size>::get(void) {					//r
 
 
 template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, Size>::SearchItemTail2Range(const void *item, size_t items, size_t range, bool tailPosUpdate){
-	//szuka czy w buforze znajduje się item[] jeśli tak to:
-	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
-	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
-	//			FALSE	- jeśli nie odnaleziono szukanej wartości
-
 	circularBufferSearchResult returnVAL;
 	returnVAL.isFound =false;
 	returnVAL.tail2virtualTail_ =0;
@@ -388,9 +382,9 @@ template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, S
 
 		if (range > max_size_)
 			range = max_size_;
-		size_t toLinearedHead_ = tail_ + range; //dataSize(head_, range);				//virtualny koniec bufora, gdyby był liniowym
+		size_t toLinearedHead_ = tail_ + range;
 
-		size_t itemsOnTheEnd;										//liczba pamięta ile danych memcmp powinno sprawdzić na końcu bufora kołowego, a ile na jego początku
+		size_t itemsOnTheEnd;						//liczba pamięta ile danych memcmp powinno sprawdzić na końcu bufora kołowego, a ile na jego początku
 		size_t tail2virtualTail_Distance = 0;
 
 		char* cbuf_ = (char *) buf_;
@@ -433,11 +427,6 @@ template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, S
 
 template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, Size>::SearchItem(const void *item, size_t items, bool tailPosUpdate) {
 	return SearchItemTail2Range (item, items, dataSize(), tailPosUpdate);
-//	//szuka czy w buforze znajduje się item[] jeśli tak to:
-//	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
-//	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
-//	//			FALSE	- jeśli nie odnaleziono szukanej wartości
-//
 //	circularBufferSearchResult returnVAL;
 //	returnVAL.isFound =false;
 //	returnVAL.tail2virtualTail_ =0;
@@ -487,11 +476,6 @@ template<typename T, size_t Size> circularBufferSearchResult CircularBuffer<T, S
 
 
 template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItem(const void *item, size_t items, bool tailPosUpdate) {
-	//szuka czy w buforze znajduje się item[] jeśli tak to:
-	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
-	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
-	//			FALSE	- jeśli nie odnaleziono szukanej wartości
-
 	return searchItemTail2Range(item, items, dataSize(), tailPosUpdate);
 //	if (!isOverflowed())
 //	{
@@ -531,12 +515,6 @@ template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItem(const
 
 
 template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItemTail2Range(const void *item, size_t items, size_t range, bool tailPosUpdate) {
-	//szuka czy w buforze znajduje się item[] jeśli tak to:
-	//tail_ ustawia na miejsce gdzie znajduje się początek szukanej wartości,
-	//ZWRACA:	TRUE	- jeśli odnaleziono szukaną wartość
-	//			FALSE	- jeśli nie odnaleziono szukanej wartości
-
-
 	if (!isOverflowed())
 	{
 		size_t searchingPosition = tail_;
@@ -575,4 +553,5 @@ template<typename T, size_t Size> bool CircularBuffer<T, Size>::searchItemTail2R
 						//bufor został przepełniony i istnieje ryzyko błędnego odczytu
 }
 
-#endif /* CIRCULARBUFFER_H_ */
+#endif
+/* CIRCULARBUFFER_H_ */
